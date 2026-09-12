@@ -1,0 +1,5 @@
+.sites-runtime/
+qa*.png
+qa.cjs
+*.tar.gz
+*.tar
