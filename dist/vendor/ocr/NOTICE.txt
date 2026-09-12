@@ -1,0 +1,8 @@
+Local OCR: Tesseract.js 6.0.1, tesseract.js-core 6.1.2 (Apache-2.0).
+Source: https://github.com/naptha/tesseract.js
+Source: https://github.com/naptha/tesseract.js-core
+English and Simplified Chinese LSTM language models:
+https://cdn.jsdelivr.net/npm/@tesseract.js-data/eng@1.0.0/4.0.0_best_int/eng.traineddata.gz
+https://cdn.jsdelivr.net/npm/@tesseract.js-data/chi_sim@1.0.0/4.0.0_best_int/chi_sim.traineddata.gz
+Models from Tesseract OCR tessdata, Apache-2.0.
+All OCR assets are served by this site. Images are processed in a browser worker and are not uploaded or persisted.
