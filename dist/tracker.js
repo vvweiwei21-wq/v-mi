@@ -146,7 +146,7 @@ function renderTracker(){
   $('month-summary').textContent=`本月 ${successes} 天全部完成 · ${recorded} 天有记录${recorded?` · 平均完成度 ${Math.round(scoreSum/recorded)}%`:''}`;
   const e=Nutrition.evaluation(state.days[selected],selected,today);
   $('review-date').textContent=`${selected.replace(/-/g,'.')} ${selected===today?'· 今天':''}`;
-  $('review-emoji').textContent=e.emoji;$('review-percent').textContent=e.status==='empty'?'—':`${e.score}%`;$('review-status').textContent=statusName(e.status);
+  $('review-emoji').textContent=e.emoji;$('review-emoji').className=e.status;$('review-percent').textContent=e.status==='empty'?'—':`${e.score}%`;$('review-status').textContent=statusName(e.status);
   $('review-fill').style.width=e.score+'%';$('review-tasks').replaceChildren();
   e.tasks.forEach(task=>{const item=document.createElement('span');item.className=task.done?'done':'';item.textContent=`${task.done?'✓':'○'} ${task.name}`;$('review-tasks').append(item);});
   $('review-message').textContent=e.status==='success'?'六项计划都完成了。今天，给自己一个笑脸。':e.status==='failed'?`完成了 ${e.completed} / 6 项。表情记录结果，不定义你；下一天继续。`:e.status==='empty'?'这一天还没有记录。从一餐饭或一杯水开始。':`已完成 ${e.completed} / 6 项，今天还在继续。`;
