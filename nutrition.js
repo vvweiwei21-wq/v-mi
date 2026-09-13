@@ -112,8 +112,9 @@
     const tasks=[...['早餐','午餐','晚餐'].map((name,i)=>({name,done:!!d?.meals?.[i]?.length})),{name:'喝水',done:(d?.water||0)>=2000},{name:'睡眠',done:!!d?.sleep},{name:'阅读',done:!!d?.read}];
     const completed=tasks.filter(t=>t.done).length,score=Math.round(completed/6*100);
     const hasRecord=!!d&&(d.meals.some(m=>m.length)||d.water>0||d.sleep||d.read||d.finalized);
-    const status=date>today?'future':!hasRecord?'empty':score===100?'success':date<today||d.finalized?'failed':'progress';
-    return {tasks,completed,score,status,emoji:{success:'😊',failed:'😠',progress:'◔',empty:'—',future:''}[status]};
+    const settled=date<today||d?.finalized;
+    const status=date>today?'future':!hasRecord?'empty':score===100?'success':score>=50?'halfway':settled?'failed':'progress';
+    return {tasks,completed,score,status,characterState:score===100?'happy':score>=50?'encouraging':'idle',emoji:{success:'😊',halfway:'🙂',failed:'😠',progress:'◔',empty:'—',future:''}[status]};
   }
   const api={catalog,query,portion,parseLabel,labelPortion,evaluation};root.Nutrition=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

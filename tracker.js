@@ -149,9 +149,9 @@ function renderTracker(){
   $('review-emoji').textContent=e.emoji;$('review-emoji').className=e.status;$('review-percent').textContent=e.status==='empty'?'—':`${e.score}%`;$('review-status').textContent=statusName(e.status);
   $('review-fill').style.width=e.score+'%';$('review-tasks').replaceChildren();
   e.tasks.forEach(task=>{const item=document.createElement('span');item.className=task.done?'done':'';item.textContent=`${task.done?'✓':'○'} ${task.name}`;$('review-tasks').append(item);});
-  $('review-message').textContent=e.status==='success'?'六项计划都完成了。今天，给自己一个笑脸。':e.status==='failed'?`完成了 ${e.completed} / 6 项。表情记录结果，不定义你；下一天继续。`:e.status==='empty'?'这一天还没有记录。从一餐饭或一杯水开始。':`已完成 ${e.completed} / 6 项，今天还在继续。`;
+  $('review-message').textContent=e.status==='success'?'六项计划都完成了。今天，给自己一个笑脸。':e.status==='halfway'?`完成了 ${e.completed} / 6 项，已经过半啦。三只小伙伴正在为你加油。`:e.status==='failed'?`完成了 ${e.completed} / 6 项。表情记录结果，不定义你；下一天继续。`:e.status==='empty'?'这一天还没有记录。从一餐饭或一杯水开始。':`已完成 ${e.completed} / 6 项，今天还在继续。`;
   $('finish-day').hidden=selected!==today||e.status==='empty'||e.status==='success';$('finish-day').textContent=day().finalized?'继续记录今天':'结束今天，查看评价';
 }
-function statusName(status){return {success:'全部完成',failed:'未完成',progress:'进行中',empty:'未记录',future:'尚未开始'}[status];}
+function statusName(status){return {success:'全部完成',halfway:'完成过半',failed:'未完成',progress:'进行中',empty:'未记录',future:'尚未开始'}[status];}
 $('finish-day').onclick=()=>mutate(d=>d.finalized=!d.finalized);
 render();
