@@ -158,6 +158,13 @@
     if(!Number.isFinite(count)||count<=0||count>20)throw Error('请选择有效份数');
     return {name:name.trim()||'包装食品',grams:round(parsed.grams*count),...Object.fromEntries(factors.map(k=>[k,round(parsed[k]*count)])),portion:`${count} ${parsed.unit}`,source:'label',count,labelBase:parsed,missing:parsed.missing||[]};
   }
+  function manualPortion(name,kjPer100g,grams){
+    const kj=Number(kjPer100g),weight=Number(grams);
+    if(!Number.isFinite(kj)||kj<=0||kj>100000)throw Error('请输入包装上每 100g 的千焦数');
+    if(!Number.isFinite(weight)||weight<=0||weight>10000)throw Error('请输入这次实际吃下的克重');
+    const foodName=name.trim();if(!foodName)throw Error('请填写食品名称');
+    return {name:foodName,grams:round(weight),kcal:round(kj/4.184*weight/100),carbs:0,protein:0,fat:0,portion:`${round(weight)} g`,source:'manual',missing:['carbs','protein','fat'],manualBase:{kjPer100g:round(kj),grams:round(weight)}};
+  }
   function evaluation(d,date,today){
     const tasks=[...['早餐','午餐','晚餐'].map((name,i)=>({name,done:!!d?.meals?.[i]?.length})),{name:'喝水',done:(d?.water||0)>=2000},{name:'睡眠',done:!!d?.sleep},{name:'阅读',done:!!d?.read}];
     const completed=tasks.filter(t=>t.done).length,score=Math.round(completed/6*100);
@@ -166,5 +173,5 @@
     const status=date>today?'future':!hasRecord?'empty':score===100?'success':score>=50?'halfway':settled?'failed':'progress';
     return {tasks,completed,score,status,characterState:score===100?'happy':score>=50?'encouraging':'idle',emoji:{success:'😊',halfway:'🙂',failed:'😠',progress:'◔',empty:'—',future:''}[status]};
   }
-  const api={catalog,query,portion,parseLabel,labelPortion,evaluation};root.Nutrition=api;if(typeof module!=='undefined')module.exports=api;
+  const api={catalog,query,portion,parseLabel,labelPortion,manualPortion,evaluation};root.Nutrition=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

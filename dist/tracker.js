@@ -3,8 +3,8 @@ const nutrientNames={carbs:'碳水',protein:'蛋白质',fat:'脂肪'};
 function switchEntry(mode){
   ocrGeneration++;if(ocrWorker){ocrWorker.terminate();ocrWorker=null;}
   entryMode=mode;legacyFood=null;picked=null;parsedLabel=null;
-  $('name-panel').hidden=mode!=='name';$('label-panel').hidden=mode!=='label';
-  $('name-tab').setAttribute('aria-pressed',String(mode==='name'));$('label-tab').setAttribute('aria-pressed',String(mode==='label'));
+  $('name-panel').hidden=mode!=='name';$('manual-panel').hidden=mode!=='manual';$('label-panel').hidden=mode!=='label';
+  $('name-tab').setAttribute('aria-pressed',String(mode==='name'));$('manual-tab').setAttribute('aria-pressed',String(mode==='manual'));$('label-tab').setAttribute('aria-pressed',String(mode==='label'));
   $('portion-panel').hidden=true;$('save-food').disabled=true;$('label-confirm').checked=false;
   if(mode==='name')showMatches();
 }
@@ -19,6 +19,8 @@ function openFood(i,f){
     $('food-search').value=f.name;showMatches();selectFood(Nutrition.catalog.find(v=>v.id===f.catalogId),f.count||1);
   }else if(f?.source==='label'&&f.labelBase){
     switchEntry('label');parsedLabel=f.labelBase;$('package-name').value=f.name;$('portion-count').value=f.count||1;$('label-confirm').checked=true;showPortion();
+  }else if(f?.source==='manual'&&f.manualBase){
+    switchEntry('manual');$('manual-name').value=f.name;$('manual-kj').value=f.manualBase.kjPer100g;$('manual-grams').value=f.manualBase.grams;showManual();
   }else if(f){
     legacyFood=f;$('food-search').value=f.name;$('food-matches').replaceChildren();$('portion-count').value=1;showPortion();
   }
@@ -40,7 +42,15 @@ function currentPortion(){
   if(legacyFood){if(!Number.isFinite(count)||count<=0||count>20)throw Error('份数无效');return {...legacyFood,...Object.fromEntries(['kcal','carbs','protein','fat','grams'].map(k=>[k,Math.round(legacyFood[k]*count*10)/10])),portion:count===1?(legacyFood.portion||'原记录份量'):`${count} × 原记录份量`,source:'legacy'};}
   if(entryMode==='name'&&picked)return Nutrition.portion(picked,count);
   if(entryMode==='label'&&parsedLabel)return Nutrition.labelPortion(parsedLabel,count,$('package-name').value);
+  if(entryMode==='manual')return Nutrition.manualPortion($('manual-name').value,$('manual-kj').value,$('manual-grams').value);
   return null;
+}
+function showManual(){
+  let food=null,error='';try{food=currentPortion();}catch(e){error=e.message;}
+  $('manual-error').textContent=error;$('save-food').disabled=!food;
+  $('manual-kcal').textContent=food?n(food.kcal):'—';
+  const kj=Number($('manual-kj').value),grams=Number($('manual-grams').value);
+  $('manual-formula').textContent=food?`${n(kj)} kJ ÷ 4.184 × ${n(grams)}g ÷ 100`:kj>0&&grams>0?'请补全食品名称':'填写两个数值后自动计算';
 }
 function showPortion(){
   $('portion-panel').hidden=!(picked||parsedLabel||legacyFood);
@@ -58,7 +68,8 @@ function showPortion(){
   $('result-note').textContent=entryMode==='label'?`${parsedLabel.originalEnergy}，已自动换算成大卡。${parsedLabel.warnings.join(' ')}`:'不同大小与做法会有差异，这是一份便于记录的近似值。';
 }
 $('food-search').oninput=()=>{picked=null;legacyFood=null;$('portion-panel').hidden=true;$('save-food').disabled=true;showMatches();};
-$('name-tab').onclick=()=>switchEntry('name');$('label-tab').onclick=()=>switchEntry('label');
+$('name-tab').onclick=()=>switchEntry('name');$('manual-tab').onclick=()=>{switchEntry('manual');showManual();};$('label-tab').onclick=()=>switchEntry('label');
+$('manual-name').oninput=showManual;$('manual-kj').oninput=showManual;$('manual-grams').oninput=showManual;
 $('portion-count').oninput=showPortion;
 $('portion-minus').onclick=()=>{$('portion-count').value=Math.max(.25,Number($('portion-count').value)-.5);showPortion();};
 $('portion-plus').onclick=()=>{$('portion-count').value=Math.min(20,Number($('portion-count').value)+.5);showPortion();};
