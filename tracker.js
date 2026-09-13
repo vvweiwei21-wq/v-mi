@@ -165,4 +165,10 @@ function renderTracker(){
 }
 function statusName(status){return {success:'全部完成',halfway:'完成过半',failed:'未完成',progress:'进行中',empty:'未记录',future:'尚未开始'}[status];}
 $('finish-day').onclick=()=>mutate(d=>d.finalized=!d.finalized);
+const GUIDE_KEY='vmi.guideSeen.v1';
+function openGuide(){$('guide-dialog').showModal();}
+function closeGuide(){$('guide-dialog').close();}
+$('open-guide').onclick=openGuide;$('guide-start').onclick=closeGuide;$('guide-dialog').querySelector('.guide-close').onclick=closeGuide;
+$('guide-dialog').addEventListener('close',()=>localStorage.setItem(GUIDE_KEY,'1'));
+if(!localStorage.getItem(GUIDE_KEY))requestAnimationFrame(openGuide);
 render();
