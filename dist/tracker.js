@@ -136,6 +136,19 @@ async function recognizePhoto(file,append){
   finally{clearTimeout(timeout);if(worker)await worker.terminate();if(ocrWorker===worker)ocrWorker=null;}
 }
 $('food-dialog').addEventListener('close',()=>{ocrGeneration++;if(ocrWorker){ocrWorker.terminate();ocrWorker=null;}if(photoUrl){URL.revokeObjectURL(photoUrl);photoUrl=null;}});
+function renderTodos(d=day()){
+  const todos=Array.isArray(d.todos)?d.todos:[],done=todos.filter(t=>t.done).length;
+  $('todo-count').textContent=`${done} / ${todos.length}`;$('todo-empty').hidden=todos.length>0;$('todo-list').replaceChildren();
+  todos.forEach(todo=>{
+    const row=document.createElement('div');row.className=`todo-row${todo.done?' done':''}`;
+    const check=document.createElement('input');check.type='checkbox';check.checked=todo.done;check.setAttribute('aria-label',`标记${todo.text}为${todo.done?'未完成':'完成'}`);check.onchange=()=>mutate(d=>{const item=(d.todos||[]).find(t=>t.id===todo.id);if(item)item.done=check.checked;});
+    const text=document.createElement('span');text.textContent=todo.text;
+    const remove=document.createElement('button');remove.type='button';remove.textContent='×';remove.setAttribute('aria-label',`删除待办${todo.text}`);remove.onclick=()=>mutate(d=>d.todos=(d.todos||[]).filter(t=>t.id!==todo.id));
+    row.append(check,text,remove);$('todo-list').append(row);
+  });
+}
+$('todo-form').onsubmit=e=>{e.preventDefault();const text=$('todo-input').value.trim();if(!text)return;const todos=day().todos||[];if(todos.length>=20){$('todo-input').setCustomValidity('每天最多添加 20 项待办');$('todo-input').reportValidity();return;}$('todo-input').setCustomValidity('');mutate(d=>{if(!d.todos)d.todos=[];d.todos.push({id:crypto.randomUUID(),text,done:false});});$('todo-input').value='';};
+$('todo-input').oninput=()=>$('todo-input').setCustomValidity('');
 function dateParts(year,month,day){return `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;}
 function moveMonth(offset){const [y,m]=monthView.split('-').map(Number);const d=new Date(y,m-1+offset,1);monthView=dateParts(d.getFullYear(),d.getMonth()+1,1).slice(0,7);renderTracker();}
 $('month-prev').onclick=()=>moveMonth(-1);$('month-next').onclick=()=>moveMonth(1);$('month-today').onclick=()=>{monthView=localDate().slice(0,7);renderTracker();};
